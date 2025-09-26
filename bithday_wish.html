@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HBD Aryama</title>
+  <link href="https://fonts.googleapis.com/css2?family=Solitreo&family=Pangolin&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --background: #fee2e9;
+      --light-pink: #fcbbcc;
+      --pink: #fba7bd;
+      --dark-pink: #f980a1;
+      --shadow: #e8c5d0;
+      --card: #fff;
+      --heart: #f40b4a;
+      --sparkle: #ffffff;
+      --gold: #ffd700;
+      --silver: #c0c0c0;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Loader Styles */
+    .loader-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(135deg, var(--light-pink), var(--pink));
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+
+    .loader-container.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .loader {
+      width: 60px;
+      height: 60px;
+      border: 4px solid var(--light-pink);
+      border-top: 4px solid var(--heart);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    .loader-text {
+      font-family: 'Pangolin', cursive;
+      font-size: 18px;
+      color: var(--heart);
+      font-weight: bold;
+    }
+
+    .progress-bar {
+      width: 200px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 2px;
+      margin-top: 20px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--heart);
+      width: 0%;
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Main Content - Initially Hidden */
+    .main-content {
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.8s ease, visibility 0.8s ease;
+    }
+
+    .main-content.loaded {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    h1 {
+      font-family: 'Solitreo', cursive;
+      font-size: clamp(2vmin, 3vw, 4vmin);
+      line-height: 1.2;
+      text-align: center;
+    }
+
+    body {
+      height: 100vh;
+      width: 100vw;
+      background: var(--background);
+      font-family: "Pangolin", cursive;
+      font-size: 1vmin;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.8s ease;
+      position: relative;
+      overflow: hidden;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    /* Background image cycling - 40 seconds per cycle, will run 2 cycles for 80 seconds total */
+    body.envelope-opened {
+      animation: cycleBackgrounds 40s infinite;
+    }
+
+    .valentine {
+      height: 100vh;
+      width: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: linear-gradient(313.01deg, rgba(221, 84, 133, 1), rgba(132, 22, 72, 1) 81.14%);
+      z-index: 1;
+      transition: opacity 0.8s ease;
+    }
+
+    .valentine.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .valentine > div {
+      position: absolute;
+      height: 100vh;
+      width: 100%;
+    }
+
+    /* Optimized heart animations - reduced complexity */
+    .heart-group {
+      will-change: transform;
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+
+    .heart-group.active {
+      opacity: 1;
+    }
+
+    #heart-group-1 {
+      background: 
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 85L35 70c-10-8-15-18-15-30 0-15 10-25 25-25 8 0 15 4 20 10 5-6 12-10 20-10 15 0 25 10 25 25 0 12-5 22-15 30L50 85z" fill="%23f40b4a"/></svg>') 50% 50% no-repeat,
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 85L35 70c-10-8-15-18-15-30 0-15 10-25 25-25 8 0 15 4 20 10 5-6 12-10 20-10 15 0 25 10 25 25 0 12-5 22-15 30L50 85z" fill="%23f40b4a"/></svg>') 25% 25% no-repeat;
+      background-size: 20px 20px;
+      filter: blur(8px) drop-shadow(0 0 8px var(--heart));
+      z-index: 10;
+    }
+
+    #heart-group-1.active {
+      animation: drop linear 17s 2s infinite, gentleGlow 2s ease-in-out infinite;
+    }
+
+    #heart-group-2 {
+      background: 
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 85L35 70c-10-8-15-18-15-30 0-15 10-25 25-25 8 0 15 4 20 10 5-6 12-10 20-10 15 0 25 10 25 25 0 12-5 22-15 30L50 85z" fill="%23f980a1"/></svg>') 50% 50% no-repeat,
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 85L35 70c-10-8-15-18-15-30 0-15 10-25 25-25 8 0 15 4 20 10 5-6 12-10 20-10 15 0 25 10 25 25 0 12-5 22-15 30L50 85z" fill="%23f980a1"/></svg>') 25% 75% no-repeat;
+      background-size: 30px 30px;
+      filter: blur(3px) drop-shadow(0 0 12px var(--pink));
+      z-index: 20;
+    }
+
+    #heart-group-2.active {
+      animation: drop linear 14s 0s infinite, gentleGlow 2.5s ease-in-out infinite;
+    }
+
+    /* Stars - simplified and lazy loaded */
+    .star-group {
+      opacity: 0;
+    }
+
+    .star-group.active {
+      opacity: 1;
+    }
+
+    #star-group-1 {
+      background: 
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><polygon points="50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35" fill="%23ffffff"/></svg>') 50% 50% no-repeat,
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><polygon points="50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35" fill="%23ffffff"/></svg>') 25% 25% no-repeat;
+      background-size: 15px 15px;
+      filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.9));
+      z-index: 60;
+    }
+
+    #star-group-1.active {
+      animation: glitter linear 1.8s 0s infinite, starSparkle 2s ease-in-out infinite;
+    }
+
+    .heart-lg {
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 85L35 70c-10-8-15-18-15-30 0-15 10-25 25-25 8 0 15 4 20 10 5-6 12-10 20-10 15 0 25 10 25 25 0 12-5 22-15 30L50 85z" fill="%23f40b4a"/></svg>') no-repeat;
+      background-size: contain;
+      height: clamp(200px, 25vmin, 389px);
+      width: clamp(225px, 28vmin, 438px);
+      top: 50%;
+      left: -2%;
+      transform: rotate(299deg);
+      filter: blur(1px) drop-shadow(0 0 15px var(--heart));
+      z-index: 45;
+      position: absolute;
+      animation: heartFloat 4s ease-in-out infinite;
+    }
+
+    .heart-sm {
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 85L35 70c-10-8-15-18-15-30 0-15 10-25 25-25 8 0 15 4 20 10 5-6 12-10 20-10 15 0 25 10 25 25 0 12-5 22-15 30L50 85z" fill="%23fba7bd"/></svg>') no-repeat;
+      background-size: contain;
+      height: clamp(130px, 16vmin, 264px);
+      width: clamp(150px, 19vmin, 299px);
+      top: 50%;
+      left: 65%;
+      transform: rotate(45deg);
+      filter: blur(5px) drop-shadow(0 0 12px var(--pink));
+      z-index: 15;
+      position: absolute;
+      animation: heartFloat 3.5s ease-in-out infinite reverse;
+    }
+
+    .heart-xs {
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 85L35 70c-10-8-15-18-15-30 0-15 10-25 25-25 8 0 15 4 20 10 5-6 12-10 20-10 15 0 25 10 25 25 0 12-5 22-15 30L50 85z" fill="%23f980a1"/></svg>') no-repeat;
+      background-size: contain;
+      height: clamp(45px, 6vmin, 87px);
+      width: clamp(46px, 6vmin, 89px);
+      top: 10%;
+      left: 30%;
+      transform: rotate(299deg);
+      filter: blur(3px) drop-shadow(0 0 8px var(--dark-pink));
+      z-index: 35;
+      position: absolute;
+      animation: heartFloat 5s ease-in-out infinite;
+    }
+
+    .overlay {
+      background-color: rgba(255, 255, 255, 0.23);
+      height: 100vh;
+      width: 100vw;
+      position: absolute;
+      z-index: 100;
+      transition: opacity 0.8s ease;
+    }
+
+    .overlay.hidden {
+      opacity: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 200;
+      will-change: transform;
+    }
+
+    .envelope {
+      position: relative;
+      background: var(--dark-pink);
+      height: 30vmin;
+      width: 47.9vmin;
+      filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.3));
+    }
+
+    .card {
+      position: absolute;
+      background: var(--card);
+      height: 25vmin;
+      width: 43vmin;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      left: 2.5vmin;
+      top: 0vmin;
+      animation: slide-rev 0.2s ease-out;
+      will-change: transform;
+      filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.2));
+    }
+
+    .message {
+      position: absolute;
+      top: 5vmin;
+    }
+
+    .cover {
+      position: absolute;
+      height: 0;
+      width: 0;
+      border-bottom: 15vmin solid var(--pink);
+      border-left: 24vmin solid transparent;
+      border-right: 24vmin solid transparent;
+      top: 15vmin;
+      z-index: 3;
+    }
+
+    .cover::after {
+      position: absolute;
+      content: "";
+      border-left: 24.5vmin solid var(--light-pink);
+      border-bottom: 15vmin solid transparent;
+      border-top: 15vmin solid transparent;
+      top: -15vmin;
+      left: -24vmin;
+    }
+
+    .cover::before {
+      position: absolute;
+      content: "";
+      border-right: 24.5vmin solid var(--light-pink);
+      border-bottom: 15vmin solid transparent;
+      border-top: 15vmin solid transparent;
+      top: -15vmin;
+      left: -0.5vmin;
+    }
+
+    .lid {
+      position: absolute;
+      height: 0;
+      width: 0;
+      border-top: 15vmin solid var(--dark-pink);
+      border-left: 24vmin solid transparent;
+      border-right: 24vmin solid transparent;
+      top: 0;
+      transform-origin: top;
+      animation: open-rev 2s;
+      will-change: transform;
+      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+    }
+
+    .container.clicked .lid {
+      animation: open 0.5s ease-out;
+      animation-fill-mode: forwards;
+    }
+
+    .container.clicked .card {
+      animation: slide 0.2s ease-out;
+      animation-delay: 0.5s;
+      animation-fill-mode: forwards;
+    }
+
+    .shadow {
+      position: relative;
+      top: 3vmin;
+      border-radius: 50%;
+      opacity: 0.7;
+      height: 2vmin;
+      width: 48vmin;
+      background: var(--shadow);
+    }
+
+    .heart {
+      position: relative;
+      width: 5vmin;
+      height: 4vmin;
+      top: 7vmin;
+      left: -1vmin;
+      filter: drop-shadow(0 0 8px var(--heart));
+    }
+
+    .heart:before,
+    .heart:after {
+      position: absolute;
+      content: "";
+      left: 2.5vmin;
+      top: 0;
+      width: 2.5vmin;
+      height: 4vmin;
+      background: var(--heart);
+      border-radius: 2.5vmin 2.5vmin 0 0;
+      transform: rotate(-45deg);
+      transform-origin: 0 100%;
+    }
+
+    .heart:after {
+      left: 0;
+      transform: rotate(45deg);
+      transform-origin: 100% 100%;
+    }
+
+    /* Mobile optimizations */
+    @media (max-width: 768px) {
+      body {
+        font-size: 1.2vmin;
+      }
+      
+      h1 {
+        font-size: 3.5vmin;
+        line-height: 1.3;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        font-size: 1.5vmin;
+      }
+      
+      h1 {
+        font-size: 4vmin;
+        line-height: 1.2;
+      }
+      
+      .message {
+        top: 4vmin;
+      }
+    }
+
+    /* Optimized keyframe animations */
+    @keyframes open {
+      to {
+        transform: rotateX(180deg);
+      }
+    }
+
+    @keyframes slide {
+      to {
+        transform: translateY(clamp(-10vmin, -15vmin, -150px));
+        z-index: 2;
+      }
+    }
+
+    @keyframes open-rev {
+      from {
+        transform: rotateX(-180deg);
+      }
+    }
+
+    @keyframes slide-rev {
+      from {
+        transform: translateY(clamp(-10vmin, -15vmin, -150px));
+      }
+    }
+
+    @keyframes drop {
+      from {
+        transform: translateY(-100%);
+      }
+      to {
+        transform: translateY(100%);
+      }
+    }
+
+    @keyframes glitter {
+      0%, 100% {
+        opacity: 0.3;
+      }
+      50% {
+        opacity: 1;
+      }
+    }
+
+    @keyframes gentleGlow {
+      0%, 100% {
+        filter: blur(8px) drop-shadow(0 0 8px var(--heart));
+        opacity: 0.8;
+      }
+      50% {
+        filter: blur(5px) drop-shadow(0 0 15px var(--heart)) drop-shadow(0 0 25px rgba(255, 255, 255, 0.8));
+        opacity: 1;
+      }
+    }
+
+    @keyframes starSparkle {
+      0%, 100% {
+        filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.9));
+        opacity: 0.7;
+        transform: scale(1);
+      }
+      50% {
+        filter: drop-shadow(0 0 25px rgba(255, 255, 255, 1)) drop-shadow(0 0 35px var(--gold));
+        opacity: 1;
+        transform: scale(1.2);
+      }
+    }
+
+    @keyframes heartFloat {
+      0%, 100% {
+        transform: rotate(299deg) translateY(0px);
+      }
+      50% {
+        transform: rotate(299deg) translateY(-10px);
+      }
+    }
+
+    @keyframes cycleBackgrounds {
+      0% {
+        background-image: url('bg1.jpg');
+      }
+      14.28% {
+        background-image: url('bg2.jpg');
+      }
+      28.56% {
+        background-image: url('bg3.jpg');
+      }
+      42.84% {
+        background-image: url('bg4.jpg');
+      }
+      57.12% {
+        background-image: url('bg5.jpg');
+      }
+      71.4% {
+        background-image: url('bg6.jpg');
+      }
+      85.68% {
+        background-image: url('bg7.jpg');
+      }
+      100% {
+        background-image: url('bg1.jpg');
+      }
+    }
+
+    /* Touch device optimizations */
+    @media (hover: none) and (pointer: coarse) {
+      .container.clicked .lid {
+        animation: open 0.5s ease-out;
+        animation-fill-mode: forwards;
+      }
+
+      .container.clicked .card {
+        animation: slide 0.2s ease-out;
+        animation-delay: 0.5s;
+        animation-fill-mode: forwards;
+      }
+    }
+
+    /* Reduce motion for accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      
+      .loader {
+        animation: none;
+      }
+    }
+
+    /* High contrast mode support */
+    @media (prefers-contrast: high) {
+      :root {
+        --background: #ffffff;
+        --light-pink: #ff69b4;
+        --pink: #ff1493;
+        --dark-pink: #dc143c;
+        --shadow: #000000;
+        --card: #ffffff;
+        --heart: #ff0000;
+      }
+    }
+
+    /* Performance optimization for low-end devices */
+    .reduced-effects .heart-group {
+      filter: none !important;
+      animation: none !important;
+    }
+
+    .reduced-effects .star-group {
+      filter: none !important;
+      animation: none !important;
+    }
+  </style>
+</head>
+<body>
+  <!-- Loader -->
+  <div class="loader-container" id="loader">
+    <div class="loader"></div>
+    <div class="loader-text">Loading Birthday Magic...</div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress"></div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content" id="main-content">
+    <div class="valentine" id="valentine-bg">
+      <div id="heart-group-1" class="heart-group"></div>
+      <div id="heart-group-2" class="heart-group"></div>
+      <div id="star-group-1" class="star-group"></div>
+      <div class="heart-fixed heart-xs"></div>
+      <div class="heart-fixed heart-sm"></div>
+      <div class="heart-fixed heart-lg"></div>
+      <div class="overlay" id="overlay"></div>
+    </div>
+    <div class="container" id="envelope-container">
+      <div class="envelope"></div>
+      <div class="card">
+        <h1 class="message">Happy Birthday H,<br>B<br>I</h1>
+        <div class="heart"></div>
+      </div>
+      <div class="cover"></div>
+      <div class="lid"></div>
+      <div class="shadow"></div>
+    </div>
+  </div>
+  
+  <audio id="valentine-audio" preload="none">
+    <source src="hbd.mp3" type="audio/mpeg">
+    <source src="hbd.ogg" type="audio/ogg">
+    <source src="hbd.wav" type="audio/wav">
+  </audio>
+  
+  <script>
+    // Performance and loading variables
+    let isEnvelopeOpened = false;
+    let audioContext = null;
+    let musicPlaying = false;
+    let resourcesLoaded = false;
+    let animationsEnabled = true;
+    
+    // DOM elements
+    const container = document.getElementById('envelope-container');
+    const audio = document.getElementById('valentine-audio');
+    const valentineBg = document.getElementById('valentine-bg');
+    const overlay = document.getElementById('overlay');
+    const body = document.body;
+    const loader = document.getElementById('loader');
+    const mainContent = document.getElementById('main-content');
+    const progress = document.getElementById('progress');
+    
+    // Performance detection
+    const isLowEndDevice = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2;
+    const isSlowConnection = navigator.connection && navigator.connection.effectiveType === '2g';
+    
+    if (isLowEndDevice || isSlowConnection) {
+      body.classList.add('reduced-effects');
+      animationsEnabled = false;
+    }
+    
+    // Lazy loading manager
+    class LazyLoader {
+      constructor() {
+        this.loadedResources = 0;
+        this.totalResources = 4; // fonts, audio, animations, images
+        this.updateProgress();
+      }
+      
+      updateProgress() {
+        const percentage = (this.loadedResources / this.totalResources) * 100;
+        progress.style.width = percentage + '%';
+        
+        if (percentage >= 100) {
+          this.completeLoading();
+        }
+      }
+      
+      markResourceLoaded() {
+        this.loadedResources++;
+        this.updateProgress();
+      }
+      
+      completeLoading() {
+        setTimeout(() => {
+          loader.classList.add('hidden');
+          mainContent.classList.add('loaded');
+          resourcesLoaded = true;
+          this.enableAnimations();
+        }, 500);
+      }
+      
+      enableAnimations() {
+        if (!animationsEnabled) return;
+        
+        // Gradually enable heart groups
+        setTimeout(() => {
+          document.getElementById('heart-group-1').classList.add('active');
+        }, 1000);
+        
+        setTimeout(() => {
+          document.getElementById('heart-group-2').classList.add('active');
+        }, 1500);
+        
+        setTimeout(() => {
+          document.getElementById('star-group-1').classList.add('active');
+        }, 2000);
+      }
+    }
+    
+    const lazyLoader = new LazyLoader();
+    
+    // Font loading detection
+    document.fonts.ready.then(() => {
+      lazyLoader.markResourceLoaded();
+    });
+    
+    // Audio preloading (lazy)
+    function loadAudio() {
+      return new Promise((resolve) => {
+        if (audio.readyState >= 3) {
+          resolve();
+          return;
+        }
+        
+        audio.addEventListener('canplaythrough', resolve, { once: true });
+        audio.addEventListener('error', resolve, { once: true });
+        audio.load();
+      });
+    }
+    
+    // Initialize audio context on first user interaction
+    function initAudio() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        audio.volume = 0.7;
+      }
+    }
+    
+    // Optimized debounce function
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+    
+    // Enhanced glitter mode - only when music plays
+    function activateGlitterMode() {
+      if (!animationsEnabled) return;
+      
+      body.classList.add('music-playing');
+      
+      // Create limited dynamic sparkles for performance
+      createDynamicSparkles(10); // Reduced from 20
+    }
+    
+    function deactivateGlitterMode() {
+      body.classList.remove('music-playing');
+      removeDynamicSparkles();
+    }
+    
+    // Create dynamic sparkle elements (performance optimized)
+    function createDynamicSparkles(count = 10) {
+      const fragment = document.createDocumentFragment();
+      
+      for (let i = 0; i < count; i++) {
+        const sparkle = document.createElement('div');
+        sparkle.className = 'dynamic-sparkle';
+        sparkle.style.cssText = `
+          position: absolute;
+          width: ${Math.random() * 4 + 2}px;
+          height: ${Math.random() * 4 + 2}px;
+          background: radial-gradient(circle, ${Math.random() > 0.5 ? '#ffd700' : '#ffffff'} 0%, transparent 70%);
+          border-radius: 50%;
+          left: ${Math.random() * 100}%;
+          top: ${Math.random() * 100}%;
+          z-index: 70;
+          opacity: 0;
+          animation: dynamicSparkle ${Math.random() * 2 + 1}s ease-in-out infinite;
+          pointer-events: none;
+        `;
+        fragment.appendChild(sparkle);
+      }
+      
+      valentineBg.appendChild(fragment);
+      
+      // Add CSS for dynamic sparkles if not exists
+      if (!document.getElementById('dynamic-sparkle-styles')) {
+        const style = document.createElement('style');
+        style.id = 'dynamic-sparkle-styles';
+        style.textContent = `
+          @keyframes dynamicSparkle {
+            0%, 100% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1.5); }
+          }
+        `;
+        document.head.appendChild(style);
+      }
+    }
+    
+    function removeDynamicSparkles() {
+      const sparkles = document.querySelectorAll('.dynamic-sparkle');
+      sparkles.forEach(sparkle => sparkle.remove());
+    }
+    
+    // Handle envelope opening with enhanced effects
+    function openEnvelope() {
+      if (isEnvelopeOpened || !resourcesLoaded) return;
+      
+      isEnvelopeOpened = true;
+      initAudio();
+      
+      requestAnimationFrame(() => {
+        // Hide valentine background and overlay
+        valentineBg.classList.add('hidden');
+        overlay.classList.add('hidden');
+        
+        // Change body background to cycling colors (optimized)
+        body.classList.add('envelope-opened');
+        
+        // Load and play audio
+        if (!audio.preload || audio.preload === 'none') {
+          loadAudio().then(() => {
+            lazyLoader.markResourceLoaded();
+            playAudioWithEffects();
+          });
+        } else {
+          playAudioWithEffects();
+        }
+      });
+    }
+    
+    function playAudioWithEffects() {
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          musicPlaying = true;
+          activateGlitterMode();
+          
+          // Monitor audio playback
+          audio.addEventListener('ended', () => {
+            musicPlaying = false;
+            deactivateGlitterMode();
+            // Auto-close envelope when music ends
+            container.classList.remove('clicked');
+            debouncedClose();
+          }, { once: true });
+          
+          audio.addEventListener('pause', () => {
+            musicPlaying = false;
+            deactivateGlitterMode();
+            // Auto-close envelope when music is paused
+            container.classList.remove('clicked');
+            debouncedClose();
+          }, { once: true });
+          
+        }).catch(error => {
+          console.log('Audio autoplay prevented:', error);
+          // Fallback: play on next user interaction
+          document.addEventListener('click', () => {
+            audio.play().then(() => {
+              musicPlaying = true;
+              activateGlitterMode();
+            }).catch(e => console.log('Audio play failed:', e));
+          }, { once: true });
+        });
+      }
+    }
+    
+    // Handle envelope closing
+    function closeEnvelope() {
+      if (!isEnvelopeOpened || !resourcesLoaded) return;
+      
+      isEnvelopeOpened = false;
+      musicPlaying = false;
+      
+      requestAnimationFrame(() => {
+        // Show valentine background and overlay
+        valentineBg.classList.remove('hidden');
+        overlay.classList.remove('hidden');
+        
+        // Remove body background effects
+        body.classList.remove('envelope-opened');
+        
+        // Deactivate glitter mode
+        deactivateGlitterMode();
+        
+        // Pause and reset audio
+        audio.pause();
+        audio.currentTime = 0;
+      });
+    }
+    
+    // Debounced event handlers for better performance
+    const debouncedOpen = debounce(openEnvelope, 100);
+    const debouncedClose = debounce(closeEnvelope, 150);
+    
+    // Initialize loading sequence
+    function initializeApp() {
+      // Mark initial resources as loaded
+      lazyLoader.markResourceLoaded(); // DOM ready
+      lazyLoader.markResourceLoaded(); // CSS loaded
+      
+      // Setup event listeners after loading
+      setTimeout(() => {
+        setupEventListeners();
+        lazyLoader.markResourceLoaded(); // Event listeners ready
+      }, 100);
+    }
+    
+    function setupEventListeners() {
+      // Click events for opening envelope
+      container.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (!isEnvelopeOpened) {
+          container.classList.add('clicked');
+          debouncedOpen();
+        }
+        // Removed manual close on click - let music duration handle it
+      });
+      
+      // Touch events for mobile (optimized)
+      container.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        initAudio();
+        if (!isEnvelopeOpened) {
+          container.classList.add('clicked');
+          debouncedOpen();
+        }
+      }, { passive: false });
+      
+      // Handle page visibility changes
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden && musicPlaying) {
+          audio.pause();
+          musicPlaying = false;
+          deactivateGlitterMode();
+        }
+      });
+    }
+    
+    // Handle window resize for responsive adjustments
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        if (isEnvelopeOpened) {
+          // Refresh layout on resize
+          container.style.transform = 'translateZ(0)'; // Force redraw
+        }
+      }, 250);
+    });
+    
+    // Audio loading with lazy approach
+    function preloadAudio() {
+      if (isLowEndDevice || isSlowConnection) {
+        // Skip audio preloading on low-end devices
+        lazyLoader.markResourceLoaded();
+        return;
+      }
+      
+      loadAudio().then(() => {
+        lazyLoader.markResourceLoaded();
+      }).catch(() => {
+        // Continue even if audio fails to load
+        lazyLoader.markResourceLoaded();
+      });
+    }
+    
+    // Intersection Observer for lazy animation loading
+    function setupLazyAnimations() {
+      if (!window.IntersectionObserver || !animationsEnabled) {
+        lazyLoader.markResourceLoaded();
+        return;
+      }
+      
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('animate');
+          }
+        });
+      }, { threshold: 0.1 });
+      
+      // Observe animation elements
+      document.querySelectorAll('.heart-group, .star-group').forEach(el => {
+        observer.observe(el);
+      });
+      
+      lazyLoader.markResourceLoaded();
+    }
+    
+    // Initialize app when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeApp);
+    } else {
+      initializeApp();
+    }
+    
+    // Start loading sequence
+    setTimeout(() => {
+      preloadAudio();
+      setupLazyAnimations();
+      preloadBackgroundImages(); // Add background image preloading
+    }, 100);
+    
+    // Fallback: ensure loader disappears even if resources fail
+    setTimeout(() => {
+      if (!resourcesLoaded) {
+        console.log('Fallback: Force loading complete');
+        lazyLoader.completeLoading();
+      }
+    }, 5000);
+    
+    // Error handling for better user experience
+    window.addEventListener('error', (e) => {
+      console.error('Error occurred:', e.error);
+      // Continue loading even with errors
+      if (!resourcesLoaded) {
+        lazyLoader.markResourceLoaded();
+      }
+    });
+    
+    // Performance monitoring (optional)
+    if ('performance' in window) {
+      window.addEventListener('load', () => {
+        const loadTime = performance.now();
+        console.log(`Page loaded in ${loadTime.toFixed(2)}ms`);
+        
+        // If page took too long to load, reduce effects
+        if (loadTime > 3000) {
+          body.classList.add('reduced-effects');
+          animationsEnabled = false;
+        }
+      });
+    }
+  </script>
+</body>
+</html>
